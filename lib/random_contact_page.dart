@@ -13,7 +13,7 @@ class RandomContactPage extends StatefulWidget {
 
 class _RandomContactPageState extends State<RandomContactPage> {
   late Future<Contact> _contact;
-  final bool _loadingContact = false;
+  bool _loadingContact = false;
   final bool _loadingImage = false;
 
   @override
@@ -23,16 +23,25 @@ class _RandomContactPageState extends State<RandomContactPage> {
   }
 
   Future<Contact> _fetchContact() async {
+    setState(() {
+      _loadingContact = true;
+    });
     final url = Uri.parse('https://randomuser.me/api/');
     final result = await http.get(url);
 
     if (result.statusCode != 200) {
+      setState(() {
+        _loadingContact = false;
+      });
       throw Exception('Error: $result.statusCode');
     }
 
     final data = jsonDecode(result.body);
     final results = data['results'];
 
+    setState(() {
+      _loadingContact = false;
+    });
     return Contact(
       title: results[0]['name']['title'],
       firstName: results[0]['name']['first'],
@@ -46,12 +55,147 @@ class _RandomContactPageState extends State<RandomContactPage> {
       email: results[0]['email'],
       phone: results[0]['phone'],
       cell: results[0]['cell'],
-      immageUrl: results[0]['picture']['medium'], 
+      immageUrl: results[0]['picture']['medium'],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Hello World!')));
+    return FutureBuilder(
+      future: _contact,
+      builder: (context, contactSnapshot) {
+        // waiting
+        if (contactSnapshot.connectionState != ConnectionState.done) {
+          return Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: Text('Random Contact'),
+              actions: [
+                IconButton(onPressed: null, icon: Icon(Icons.refresh_rounded)),
+                IconButton(onPressed: null, icon: Icon(Icons.save_outlined)),
+              ],
+            ),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        // success
+        if (contactSnapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: Text('Random Contact'),
+              actions: [
+                IconButton(onPressed: null, icon: Icon(Icons.refresh_rounded)),
+                IconButton(onPressed: null, icon: Icon(Icons.save_outlined)),
+              ],
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Column(
+                  spacing: 8.0,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Pic and Name
+                    PicAndName(name: 'Mr John Doe', imamgeUrl: 'imamgeUrl'),
+                    // Street Address
+                    Card(
+                      elevation: 4.0,
+                      child: ListTile(
+                        titleAlignment: ListTileTitleAlignment.center,
+                        leading: Icon(Icons.location_on_outlined),
+                        isThreeLine: true,
+                        title: Text(
+                          '${contactSnapshot.data!.street} ${contactSnapshot.data!.number}',
+                        ),
+                        subtitle: Text(
+                          '${contactSnapshot.data!.city}, ${contactSnapshot.data!.postcode}\n${contactSnapshot.data!.state}, ${contactSnapshot.data!.country}',
+                        ),
+                      ),
+                    ),
+                    // Email
+                    Card(
+                      elevation: 4.0,
+                      child: ListTile(
+                        titleAlignment: ListTileTitleAlignment.center,
+                        leading: Icon(Icons.email_outlined),
+                        isThreeLine: false,
+                        title: Text(contactSnapshot.data!.email),
+                        subtitle: Text('Private'),
+                      ),
+                    ),
+                    // Phone
+                    Card(
+                      elevation: 4.0,
+                      child: Column(
+                        spacing: 0.0,
+                        children: [
+                          ListTile(
+                            titleAlignment: ListTileTitleAlignment.center,
+                            leading: Icon(Icons.phone_outlined),
+                            isThreeLine: false,
+                            title: Text(contactSnapshot.data!.phone),
+                            subtitle: Text('Home'),
+                          ),
+                          ListTile(
+                            titleAlignment: ListTileTitleAlignment.center,
+                            leading: Icon(Icons.phone_android_outlined),
+                            isThreeLine: false,
+                            title: Text(contactSnapshot.data!.cell),
+                            subtitle: Text('Mobile'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // all has failed
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text('Random Contact'),
+            actions: [
+              IconButton(onPressed: null, icon: Icon(Icons.refresh_rounded)),
+              IconButton(onPressed: null, icon: Icon(Icons.save_outlined)),
+            ],
+          ),
+          body: Center(child: Icon(Icons.report_outlined)),
+        );
+      },
+    );
+  }
+}
+
+class PicAndName extends StatefulWidget {
+  final String name;
+  final String imamgeUrl;
+
+  const PicAndName({super.key, required this.name, required this.imamgeUrl});
+
+  @override
+  State<PicAndName> createState() => _PicAndNameState();
+}
+
+class _PicAndNameState extends State<PicAndName> {
+  String getInitials() {
+    List<String> parts = widget.name.split(' ');
+    return '${parts[1][0].toUpperCase()}${parts[2][0].toUpperCase()}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [CircleAvatar(child: Text(getInitials()))],
+      ),
+    );
   }
 }

@@ -8,7 +8,15 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.blue.shade900),
+      theme: ThemeData(
+        colorSchemeSeed: Colors.blue.shade900,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.blue.shade300,
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.system,
       title: 'API APP',
       home: RandomContactPage(),
     );
