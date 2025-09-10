@@ -85,7 +85,10 @@ class _RandomContactPageState extends State<RandomContactPage> {
               centerTitle: true,
               title: Text('Random Contact'),
               actions: [
-                IconButton(onPressed: null, icon: Icon(Icons.refresh_rounded)),
+                IconButton(
+                  onPressed: _loadingContact ? null : _fetchContact,
+                  icon: Icon(Icons.refresh_rounded),
+                ),
                 IconButton(onPressed: null, icon: Icon(Icons.save_outlined)),
               ],
             ),
@@ -98,7 +101,11 @@ class _RandomContactPageState extends State<RandomContactPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Pic and Name
-                    PicAndName(name: 'Mr John Doe', imamgeUrl: 'imamgeUrl'),
+                    PicAndName(
+                      name:
+                          '${contactSnapshot.data!.title} ${contactSnapshot.data!.firstName} ${contactSnapshot.data!.lastName}',
+                      imamgeUrl: contactSnapshot.data!.immageUrl,
+                    ),
                     // Street Address
                     Card(
                       elevation: 4.0,
@@ -192,9 +199,25 @@ class _PicAndNameState extends State<PicAndName> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [CircleAvatar(child: Text(getInitials()))],
+      child: SizedBox(
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            spacing: 16.0,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 64.0,
+                child: Text(
+                  getInitials(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              Text(widget.name, style: Theme.of(context).textTheme.titleLarge),
+            ],
+          ),
+        ),
       ),
     );
   }

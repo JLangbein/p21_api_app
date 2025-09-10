@@ -7,7 +7,7 @@ class Contact {
   final String city;
   final String state;
   final String country;
-  final int postcode;
+  final String postcode;
   final String email;
   final String phone;
   final String cell;
@@ -38,7 +38,7 @@ class Contact {
     city: 'Nosuchcity',
     state: 'Nosuchstate',
     country: 'Nosuchcountry',
-    postcode: 12345,
+    postcode: '12345',
     email: 'j.doe@nosuchemail.com',
     phone: '1234567890',
     cell: '1234567890',
