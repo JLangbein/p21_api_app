@@ -14,7 +14,6 @@ class RandomContactPage extends StatefulWidget {
 class _RandomContactPageState extends State<RandomContactPage> {
   late Future<Contact> _contact;
   bool _loadingContact = false;
-  final bool _loadingImage = false;
 
   @override
   void initState() {
@@ -51,7 +50,9 @@ class _RandomContactPageState extends State<RandomContactPage> {
       city: results[0]['location']['city'],
       state: results[0]['location']['state'],
       country: results[0]['location']['country'],
-      postcode: results[0]['location']['postcode'],
+      // [x] This can be either string or int!
+      // Just used the toString() method, since int and String both have them
+      postcode: results[0]['location']['postcode'].toString(),
       email: results[0]['email'],
       phone: results[0]['phone'],
       cell: results[0]['cell'],
@@ -86,7 +87,11 @@ class _RandomContactPageState extends State<RandomContactPage> {
               title: Text('Random Contact'),
               actions: [
                 IconButton(
-                  onPressed: _loadingContact ? null : _fetchContact,
+                  onPressed: _loadingContact
+                      ? null
+                      : () {
+                          _contact = _fetchContact();
+                        },
                   icon: Icon(Icons.refresh_rounded),
                 ),
                 IconButton(onPressed: null, icon: Icon(Icons.save_outlined)),
@@ -209,6 +214,7 @@ class _PicAndNameState extends State<PicAndName> {
             children: [
               CircleAvatar(
                 radius: 64.0,
+                foregroundImage: NetworkImage(widget.imamgeUrl),
                 child: Text(
                   getInitials(),
                   style: Theme.of(context).textTheme.titleLarge,
